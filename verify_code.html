@@ -1,0 +1,74 @@
+<!--
+<?php
+
+    require "../secure/autoload.php";
+    $user_data = check_login($connection);
+
+    $first_name = "";
+    $email = "";
+    if(isset($_SESSION['email']))
+    {
+        $first_name = $_SESSION['first_name'];
+        $email = $_SESSION['email'];
+
+    }
+?>
+
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Approved for Startup Funding</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
+</head>
+<body>
+
+    <section id="loader_page">
+            <center><h1 style="">Congratulations!<h1>
+                <br/>
+            <h2 style="">You Have Been Pre-Approved For $25,000+ Startup Funding!<h2>
+
+                <br/>
+
+
+
+    <form method="POST">
+        <!--<div>
+            <?php
+            if(isset($Error) && $Error !=""){
+                echo $Error;
+            }
+        ?></div>-->
+        <div id='title'><h6>Please Verify The 6-Digit Code Sent to $email </h6></div>
+        <input id='textbox' type='text' placeholder="6-Digit Code" name='code' required><br><br>
+
+        <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
+        <button type='submit' name='send'>Verify</button>
+
+
+    </form>
+
+    </section>
+
+
+
+<!--
+    <script>
+        var loader = document.getElementById("loader_page");
+
+        window.addEventListener("load", function(){
+            loader.style.display= "none";
+
+        })
+    </script>
+-->
+
+
+</body>
+</html>
