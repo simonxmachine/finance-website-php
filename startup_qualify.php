@@ -94,6 +94,7 @@
             $_SESSION['email'] =$email;
             $_SESSION['code'] =$code;
             $_SESSION['login_attempts'] =0;
+            $_SESSION['message'] = "<h1 style='color:#FDC93B';>Success!</h1><h2 style='color:white';>".  $first_name .", you have been pre-approved for a $25,000+ startup funding line of credit!</h2>";
 
             header("Location: verify_code.php");
             die;
@@ -179,13 +180,15 @@
                     </div>
 
                     <div class="form-wrapper">
-                    <input type="text" name='phone' value='<?=$phone?>' class='form-control' placeholder="Mobile Phone Number (ex. 777-777-7777)" minlength="10" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required=""
-                    oninvalid="this.setCustomValidity('Please Enter Valid Phone Number (ex. 777-777-7777)')" oninput="setCustomValidity('')">
+                    <input type="text" name='phone' value='<?=$phone?>' class='form-control' placeholder="Mobile Phone Number (ex. 777-777-7777)" minlength="10" maxlength="14" 
+                    pattern="[0-9()-]+" required="" oninvalid="this.setCustomValidity('Please Enter Valid Phone Number (ex. 777-777-7777)')" oninput="setCustomValidity('')">
                     </div>
-                
+
+                    <!--Very specific DOB pattern 
+                     pattern="^(0[1-9]|1[012]|[1-9])[- /.](0[1-9]|[12][0-9]|3[01]|[1-9])[- /.](19|20)\d\d$" -->
                     <div class="form-group">
                     <input type="text" name="dob" value='<?=$dob?>' placeholder="Date of Birth (mm/dd/yyyy)" class="form-control" required="" 
-                    pattern="^(0[1-9]|1[012]|[1-9])[- /.](0[1-9]|[12][0-9]|3[01]|[1-9])[- /.](19|20)\d\d$" minlength="6" maxlength="10" oninvalid="this.setCustomValidity('Please Enter Valid Birthdate (ex. 01/20/2000)')" oninput="setCustomValidity('')">
+                    pattern="[0-9/-]+" minlength="6" maxlength="10" oninvalid="this.setCustomValidity('Please Enter Valid Birthdate (ex. 01/20/2000)')" oninput="setCustomValidity('')">
                     <input type="number" name="credit" value='<?=$credit?>' placeholder="Credit Score" class="form-control" required="" min='0' max='999' oninvalid="this.setCustomValidity('Please Enter Valid Credit Score')" oninput="setCustomValidity('')">
                     </div>
 
@@ -269,7 +272,7 @@
                     </div>
 
                     <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
-                    <button type='submit' name='send'>Apply Now</button>
+                    <button type='submit' class='prequalify_button' name='send'>Apply Now</button>
 
                 </form>
             </div>

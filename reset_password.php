@@ -4,7 +4,6 @@
 
     $url_address = "";
     $email = "";
-    $code = "";
 
     //Add this later: If there are more than 3 code resets, lock out account and tell to call in
 
@@ -17,7 +16,7 @@
 
             $arr = false;
             $arr['email'] = $email;
-            $query = "SELECT code_resets FROM user_full WHERE email=:email LIMIT 1";
+            $query = "SELECT password_resets FROM user_full WHERE email=:email LIMIT 1";
             $stm = $connection->prepare($query);
             $check = $stm -> execute($arr);
     
@@ -26,17 +25,17 @@
                 $data = $stm-> fetchall(PDO::FETCH_OBJ);
                 if(is_array($data) && count($data) > 0){
                     $data = $data[0];
-                    $code_resets = $data-> code_resets;
-                    if($code_resets == ""){
-                        $code_resets = 0;
-                    } elseif ($code_resets >4) {
-                        $Error = "You have exceeded the number of allowable code resets. Please call (888)888-8888 or email info@fundafai.com to resolve issue.";
+                    $password_resets = $data-> password_resets;
+                    if($password_resets == ""){
+                        $password_resets = 0;
+                    } elseif ($password_resets >3) {
+                        $Error = "<font color='red';>You have exceeded the number of allowable password resets. Please call (888)888-8888 or email info@fundafai.com to resolve issue. </font>";
                         $_SESSION['error']= $Error;
-                        header("Location: reset_code.php");
+                        header("Location: reset_password.php");
                         die;
                     }
                     else{
-                        $code_resets += 1;
+                        $password_resets += 1;
                     }
                 }
                 }
@@ -45,16 +44,16 @@
             $arr = false;
             $arr['email'] = $email;
             $arr['code'] = $code;
-            $arr['code_resets'] = $code_resets;
+            $arr['password_resets'] = $password_resets;
 
-            $query = "UPDATE user_full SET code=:code, code_resets =:code_resets WHERE email=:email LIMIT 1";
+            $query = "UPDATE user_full SET code=:code, password_resets=:password_resets WHERE email=:email LIMIT 1";
             $stm = $connection->prepare($query);
             $stm -> execute($arr);
 
             //Send verification code to user
             $to = $email;
-            $subj = '[Fundafai] Email Verification Code';
-            $msg = '<h1>Your email verification code is: ' . $code .'</h1><br><h2>Please enter this code on the verfication page.</h2>' . '<br><p>If you did not request for this code, please disregard this email or respond with STOP in subject line.';
+            $subj = '[Fundafai] Password Verification Code';
+            $msg = '<h1>Your password verification code is: ' . $code .'</h1><br><h2>Please enter this code on the verfication page.</h2>' . '<br><p>If you did not request for this code, please disregard this email or respond with STOP in subject line.';
             sendEmail($to, $email, $subj, $msg);
 
             $arr = false;
@@ -63,6 +62,7 @@
             $stm = $connection->prepare($query);
             $check = $stm -> execute($arr);
     
+            //If email exists, will return error
             if($check){
                 //Can FETCH_OBJ or FETCH_ASSOC for array
                 $data = $stm-> fetchall(PDO::FETCH_OBJ);
@@ -72,14 +72,19 @@
                     $_SESSION['code']= $data->code;
                     $_SESSION['email'] = $data-> email;
                     $_SESSION['login_attempts'] =0;
-                    $_SESSION['message'] = "";
+
+                    if(isset($_SESSION['password_attempts'])){
+                        $_SESSION['password_attempts'] = 0;
+                    }
+
+                    $_SESSION['message'] = "<h1 style='color:#FDC93B';>Password Has Been Reset</h1><h2 style='color:white';>"."Please enter the verification code sent to your email. </h2>";
                     header("Location: verify_code.php");
                     die;
                 }
                 }
 
         }
-        $Error = "<font color='red';>Email does not exist. Please try again or <a href='startup_qualify.php'>register for new account.</a> </font>";
+        $Error = "<font color='red';>Email does not exist. Please try again or <a href='startup_qualify.php'>register for new account</a> </font>";
     }
 
     $_SESSION['token'] = get_random_string(61);
@@ -92,7 +97,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Verification Code - Fundafai</title>
+    <title>Reset Password - Fundafai</title>
     <script src="https://kit.fontawesome.com/80acfed07d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
@@ -112,22 +117,19 @@
                 </div>
 
                 <div class="message_subflex-item">
-
                     <?php
                         if(isset($message) && $message !=""){
                             echo $message;
                         }
 
                         if(!isset($message) || $message ==""){
-                            $message = "<h1 style='color:#FDC93B';>Reset Code</h1><h2 style='color:white';>"."Please enter email connected to account to receive new verfication code. </h2>";
+                            $message = "<h1 style='color:#FDC93B';>Reset Password</h1><h2 style='color:white';>"."Please enter email to receive new verfication code. </h2>";
                             echo $message;
                         }
                     ?>
                 </div>
             </div>
-
         </div>
-        <br/>
 
         <div class='flexbox-item right'>
             <center>    
@@ -145,21 +147,21 @@
                     }
                 ?>
             </div>
-            <br>
 
                 <h3 style="font-weight:600; color: rgb(21, 21, 100)">Please Enter Email Connected to Account:</h3>
+
                 <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
 
                 <input type='email' placeholder='Email' class='input_box_email' name='email' required
                 pattern="[a-zA-Z0-9.@-]+" oninvalid="this.setCustomValidity('Please Enter Valid Email')" oninput="setCustomValidity('')"><br>
 
-                <button type='submit' name='send'>Reset Code</button>
+                <button type='submit' name='send'>Reset Password</button>
 
             </form>
         </div>
     </div>
 
-        <footer>
+    <footer>
         
         <div class="copyright">
             <p>© 2021 Fundafai. All Rights Reserved.</p>
@@ -172,7 +174,7 @@
 
     </footer>
 
-</section>
+    </section>
 
 
 <!--

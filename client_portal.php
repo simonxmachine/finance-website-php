@@ -69,7 +69,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Password - Fundafai</title>
+    <title>Client Portal - Login</title>
     <script src="https://kit.fontawesome.com/80acfed07d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
@@ -86,7 +86,10 @@
 
                 <div class="logo_subflex-item"> 
                 <a href='../index.html'><h2>Fundafai</h2></a>
+                <a href="logout.php">Logout</a>
+
                 </div>
+
 
                 <div class="message_subflex-item">
 
@@ -94,12 +97,17 @@
                         if(isset($message) && $message !=""){
                             echo $message;
                         }
-
-                        if(!isset($message) || $message ==""){
-                            $message = "<h1 style='color:#FDC93B';>Thank you for verifying your email. </h1><h2 style='color:white';>"."Please create a new password. </h2>";
-                            echo $message;
-                        }
                     ?>
+                    <h1 style='color:#FDC93B';>Welcome back, <?=$first_name?>! </h1><h2 style='color:white';>Please check file status below: </h2>
+                        <br>
+                    <p style="color:#FDC93B;">Step 1: Pre-Qualify</p>
+                    <br>
+                    <p style="color:white;">Step 2: Verify Company Details</p>
+                    <br>
+                    <p style="color:white;">Step 3: Upload Necessary Documents</p>
+                    <br>
+                    <p style="color:white;">Step 4: Funding</p>
+
                 </div>
             </div>
 
@@ -107,14 +115,12 @@
         <br/>
 
         <div class='flexbox-item right'>
+            
             <center>    
 
             <form method="POST">
 
-
-
-                <h3 style="font-weight:600; color: rgb(21, 21, 100)">Please Create a New Password: </h3>
-                <p style="font-size:14px;">(Password must be at least 8 characters long with minimum one capital letter, one lowercase letter, one number, and one special character)</p>
+                <h3 style="font-weight:600; color: rgb(21, 21, 100)">Please update the following: </h3>
 
                 <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
                 <div>
@@ -125,12 +131,14 @@
                 ?>
                 </div>
 
-                <input id='textbox' type='password' class='input_box_email' placeholder="New Password" name='password' 
+                <input id='textbox' type='password' class='input_box_email' placeholder="Social Security #" name='password' 
                 pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,_=+^():|;~#@$!%*?&-])[A-Za-z\d.,_=+^():|;~#@$!%*?&-]{8,}$" required minlength="8" maxlength="25" oninvalid="this.setCustomValidity('Please Enter Valid Password (8+ characters with minimum 1 uppercase character, 1 lowercase character, 1 number, 1 special character [~#@$!%^*?&_=+.,:;|()-]')" oninput="setCustomValidity('')"><br>
-                <input id='textbox' type='password' class='input_box_email' placeholder="Confirm Password" name='confirm_password' required
+                <input id='textbox' type='text' class='input_box_email' placeholder="Company Name" name='company_name' 
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,_=+^():|;~#@$!%*?&-])[A-Za-z\d.,_=+^():|;~#@$!%*?&-]{8,}$" required minlength="8" maxlength="25" oninvalid="this.setCustomValidity('Please Enter Valid Password (8+ characters with minimum 1 uppercase character, 1 lowercase character, 1 number, 1 special character [~#@$!%^*?&_=+.,:;|()-]')" oninput="setCustomValidity('')"><br>
+                <input id='textbox' type='password' class='input_box_email' placeholder="EIN #" name='confirm_password' required
                 pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,_=+^():|;~#@$!%*?&-])[A-Za-z\d.,_=+^():|;~#@$!%*?&-]{8,}$" required minlength="8" maxlength="25" oninvalid="this.setCustomValidity('Please Enter Valid Password')" oninput="setCustomValidity('')"><br>
 
-                <button type='submit' name='send'>Create Password</button>
+                <button type='submit' name='send'>Update</button>
 
             </form>
 
