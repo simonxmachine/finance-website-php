@@ -101,6 +101,48 @@
     <script src="https://kit.fontawesome.com/80acfed07d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
+    <style>
+        .button2{
+            position: relative;
+        }
+
+        .fa {
+            margin-left: 0px;
+            margin-right: 8px;
+        }
+
+        .button__text{
+            color:white;
+            transition: all .2s;
+        }
+
+        .button_new_text{
+            display: none; 
+        }
+
+        .button--loading .button__text{
+            display: none;
+        }
+
+        .button--loading .button_new_text{
+            display:contents;
+            opacity: 100;
+            color:white;
+            transition: all .2s;
+        }
+
+        .button--loading::after{
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -113,7 +155,7 @@
             <div class = "subflex-container">
 
                 <div class="logo_subflex-item"> 
-                <a href='../index.html'><h2>Fundafai</h2></a>
+                <a href='../index.html'><h2>Fund<font color='#FDC93B';>a</font>fai</h2></a>
                 </div>
 
                 <div class="message_subflex-item">
@@ -152,10 +194,29 @@
 
                 <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
 
-                <input type='email' placeholder='Email' class='input_box_email' name='email' required
-                pattern="[a-zA-Z0-9.@-]+" oninvalid="this.setCustomValidity('Please Enter Valid Email')" oninput="setCustomValidity('')"><br>
+                <input id='textbox' type='email' placeholder='Email' class='input_box_email' name='email' required
+                pattern="[a-zA-Z0-9.@-]+" oninput="setCustomValidity('')"><br>
 
-                <button type='submit' name='send'>Reset Password</button>
+                <!--Original submit
+                <button type='submit' name='send'>Reset Password</button>-->
+
+                <button type='submit' name='send' id='submit_button' class="button2">
+                        <span style = "font-size: 1rem; color: white;" class="button__text">Reset Password</span>
+                        <span class="button_new_text"><i class="fa fa-circle-o-notch fa-spin"></i>Updating</span>
+                </button>
+
+                <script>
+                            let buttonclick = document.getElementById('submit_button');
+                            buttonclick.onclick = function(){
+                                buttonclick.classList.toggle('button--loading');
+                            }
+
+                            let password = document.getElementById('textbox');
+                            password.oninvalid = function(){
+                                password.setCustomValidity('Please enter valid email');
+                                buttonclick.classList.remove('button--loading');
+                            }
+                            </script>
 
             </form>
         </div>

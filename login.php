@@ -90,6 +90,53 @@
     <script src="https://kit.fontawesome.com/80acfed07d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
+    <style>
+
+        .right h3{
+            margin-top: 10px;
+        }
+
+        .button2{
+            position: relative;
+        }
+
+        .fa {
+            margin-left: 0px;
+            margin-right: 8px;
+        }
+
+        .button__text{
+            color:white;
+            transition: all .2s;
+        }
+
+        .button_new_text{
+            display: none; 
+        }
+
+        .button--loading .button__text{
+            display: none;
+        }
+
+        .button--loading .button_new_text{
+            display:contents;
+            opacity: 100;
+            color:white;
+            transition: all .2s;
+        }
+
+        .button--loading::after{
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -102,7 +149,7 @@
                 <div class = "subflex-container">
 
                     <div class="logo_subflex-item"> 
-                    <a href='../index.html'><h2>Fundafai</h2></a>
+                    <a href='../index.html'><h2>Fund<font color='#FDC93B';>a</font>fai</h2></a>
                     </div>
 
                     <div class="message_subflex-item">
@@ -140,18 +187,43 @@
                         ?>
                     </div>
 
-                        <input type='email' placeholder='Email' value='<?=$email?>' class='input_box_email' name='email' required
-                        pattern="[a-zA-Z0-9.@-]+" oninvalid="this.setCustomValidity('Please Enter Valid Email')" oninput="setCustomValidity('')"><br>
+                        <input id='email' type='email' placeholder='Email' value='<?=$email?>' class='input_box_email' name='email' required
+                        pattern="[a-zA-Z0-9.@-]+" oninput="setCustomValidity('')"><br>
 
-                        <input id='textbox' type='password' placeholder="Password" class='input_box_email' name='password' 
+                        <input id='password' type='password' placeholder="Password" class='input_box_email' name='password' 
                         pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.,_=+^():|;~#@$!%*?&-])[A-Za-z\d.,_=+^():|;~#@$!%*?&-]{8,}$" 
-                        required minlength="8" maxlength="25" oninvalid="this.setCustomValidity('Please Enter Valid Password. Passwords contain at least one capital letter, one lowercase letter, one number, and one special character')" oninput="setCustomValidity('')"><br>
+                        required minlength="8" maxlength="25" oninput="setCustomValidity('')"><br>
 
                         <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
-                        <button type='submit' name='send'>Login</button>
+
+
+                        <button type='submit' name='send' id='submit_button' class="button2">
+                        <span style = "font-size: 1rem; color: white;" class="button__text">Login</span>
+                        <span class="button_new_text"><i class="fa fa-circle-o-notch fa-spin"></i>Verifying</span>
+                         </button>
 
                     <div> <a href='reset_password.php'><p style="font-size:14px;">Forgot Password</p></a> </div>
                     <div> <a href='startup_qualify.php'><p style="font-size:14px;">Create New Account</p></a> </div>
+
+
+                <script>
+                            let buttonclick = document.getElementById('submit_button');
+                            buttonclick.onclick = function(){
+                                buttonclick.classList.toggle('button--loading');
+                            }
+
+                            let email = document.getElementById('email');
+                            email.oninvalid = function(){
+                                email.setCustomValidity('Please enter valid email');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let password = document.getElementById('password');
+                            password.oninvalid = function(){
+                                password.setCustomValidity('Please enter valid password. Passwords contain at least one capital letter, one lowercase letter, one number, and one special character');
+                                buttonclick.classList.remove('button--loading');
+                            }
+                            </script>
 
                 </form>
                 </center>

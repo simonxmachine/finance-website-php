@@ -14,11 +14,12 @@
     $llc = "";
     $ip="";
     $code="";
+    $state_list = array("CT", "DE", "FL", "ME", "MD", "NJ", "NY", "NC", "PA", "RI", "SC", "VT", "VA", "DC");
 
     if($_SERVER['REQUEST_METHOD']=="POST" && isset($_SESSION['token']) && isset($_POST['token']) && $_SESSION['token'] ==$_POST['token']){
         $email = $_POST['email'];
         if(!checkdnsrr(substr($_POST['email'], strpos($_POST['email'], '@') +1), 'MX' )){
-            $Error = "Please enter a valid email";
+            $Error = "<font color='red';>Please enter a valid email</font>";
         }
         //$date = date("Y-m-d H:i:s");
         $url_address = get_random_string(61);
@@ -50,7 +51,7 @@
             //Can FETCH_OBJ or FETCH_ASSOC for array
             $data = $stm-> fetchall(PDO::FETCH_OBJ);
             if(is_array($data) && count($data) > 0){
-                $Error = "Email is already in use";
+                $Error = "<font color='red';>Email is already in use</font>";
             }
             }
 
@@ -82,22 +83,40 @@
             $msg = 'Name: ' . $first_name . '<br />' . 'Last Name: ' . $last_name . '<br />' . 'Phone: ' . $phone . '<br />' . 'Email: ' . $email;
             sendEmail($to, $first_name, $subj, $msg);
 
-            //Send verification code to user
-            $to = $email;
-            $subj = '[Fundafai] Email Verification Code';
-            $msg = '<h1>Your email verification code is: ' . $code .'</h1><br><h2>Please enter this code on the verfication page.</h2>' . '<br><p>If you did not request for this code, please disregard this email or respond with STOP in subject line.';
-            sendEmail($to, $first_name, $subj, $msg);
 
-            //Set the session variables
-            $_SESSION['url_address']= $url_address;
-            $_SESSION['first_name']= $first_name;
-            $_SESSION['email'] =$email;
-            $_SESSION['code'] =$code;
-            $_SESSION['login_attempts'] =0;
-            $_SESSION['message'] = "<h1 style='color:#FDC93B';>Success!</h1><h2 style='color:white';>".  $first_name .", you have been pre-approved for a $25,000+ startup funding line of credit!</h2>";
+            if ($credit >= 550 && $llc == 'yes' && in_array($state, $state_list)){
 
-            header("Location: verify_code.php");
-            die;
+                //Send verification code to user only if they qualify
+                $to = $email;
+                $subj = '[Fundafai] Email Verification Code';
+                $msg = '<h1>Your email verification code is: ' . $code .'</h1><br><h2>Please enter this code on the verfication page.</h2>' . '<br><p>If you did not request for this code, please disregard this email or respond with STOP in subject line.';
+                sendEmail($to, $first_name, $subj, $msg);
+
+                //Set the session variables
+                $_SESSION['url_address']= $url_address;
+                $_SESSION['first_name']= $first_name;
+                $_SESSION['email'] =$email;
+                $_SESSION['code'] =$code;
+                $_SESSION['login_attempts'] =0;
+                $_SESSION['message'] = "<h1 style='color:#FDC93B';>Success!</h1><h2 style='color:white';>".  $first_name .", you have been pre-approved for a $25,000+ startup funding line of credit!</h2>";
+
+                header("Location: verify_code.php");
+                die;
+            }else {
+
+                $_SESSION['url_address']= $url_address;
+                $_SESSION['first_name']= $first_name;
+                $_SESSION['email'] =$email;
+                $_SESSION['code'] =$code;
+                $_SESSION['credit'] =$credit;
+                $_SESSION['llc'] =$llc;
+                $_SESSION['state'] =$state;
+                $_SESSION['login_attempts'] =0;
+                $_SESSION['message'] = "<h1 style='color:#FDC93B';>We apologize...</h1><h2 style='color:white';>"."We are unable to approve your application at this time. </h2>";
+
+                header("Location: alternative_solutions.php");
+                die;
+            }
         }
     }
     $_SESSION['token'] = get_random_string(61);
@@ -115,9 +134,66 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+<style>
+    .button2{
+        position: relative;
+    }
+
+    .fa {
+        margin-left: 0px;
+        margin-right: 8px;
+    }
+
+    .button__text{
+        color:white;
+        transition: all .2s;
+    }
+
+    .button_new_text{
+        display: none; 
+    }
+
+    .button--loading .button__text{
+        display: none;
+    }
+
+    .button--loading .button_new_text{
+        display:contents;
+        opacity: 100;
+        color:white;
+        transition: all .2s;
+    }
+
+    .button--loading::after{
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        /*
+        margin: auto;
+        border: 4px solid transparent;
+        border-top-color: white;
+        border-radius: 50%;
+        animation: button-loading-spinner 1s ease infinite;*/
+    }
+
+    @keyframes button-loading-spinner{
+        from{
+            transform: rotate(0turn);
+        }
+        to {
+            transform: rotate(1turn);
+        }
+    }
+
+</style>
 </head>
 <body style="font-family: Poppins">
-
 
 <!--Navigation-->
 <nav>
@@ -166,48 +242,49 @@
                     <h3 style="font-weight:600; color: rgb(21, 21, 100)">Get Started</h3>
                     </div>
 
+
                     <div class="form-group">
-                        <input type="text" name="first_name" placeholder="First Name" value='<?=$first_name?>' class="form-control" required=""
-                        pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninvalid="this.setCustomValidity('Please Enter Valid Name')" oninput="setCustomValidity('')">
+                        <input type="text" id ='first_name' name="first_name" placeholder="First Name" value='<?=$first_name?>' class="form-control" required=""
+                        pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninput="setCustomValidity('')">
                         
-                        <input type="text" name="last_name" placeholder="Last Name" value='<?=$last_name?>' class="form-control" required=""
-                        pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninvalid="this.setCustomValidity('Please Enter Valid Name')" oninput="setCustomValidity('')">
+                        <input type="text" id = 'last_name' name="last_name" placeholder="Last Name" value='<?=$last_name?>' class="form-control" required=""
+                        pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninput="setCustomValidity('')">
                     </div>
 
                     <div class="form-wrapper">
-                    <input type='email' placeholder='Email' value='<?=$email?>' class='form-control' name='email' required
-                    pattern="[a-zA-Z0-9.@-]+" oninvalid="this.setCustomValidity('Please Enter Valid Email')" oninput="setCustomValidity('')">
+                    <input type='email' id = 'email' placeholder='Email' value='<?=$email?>' class='form-control' name='email' required
+                    pattern="[a-zA-Z0-9.@-]+"  oninput="setCustomValidity('')">
                     </div>
 
                     <div class="form-wrapper">
-                    <input type="text" name='phone' value='<?=$phone?>' class='form-control' placeholder="Mobile Phone Number (ex. 777-777-7777)" minlength="10" maxlength="14" 
-                    pattern="[0-9()-]+" required="" oninvalid="this.setCustomValidity('Please Enter Valid Phone Number (ex. 777-777-7777)')" oninput="setCustomValidity('')">
+                    <input type="text" id ='phone' name='phone' value='<?=$phone?>' class='form-control' placeholder="Mobile Phone Number (ex. 777-777-7777)" minlength="10" maxlength="14" 
+                    pattern="[0-9()-]+" required oninput="setCustomValidity('')">
                     </div>
 
                     <!--Very specific DOB pattern 
                      pattern="^(0[1-9]|1[012]|[1-9])[- /.](0[1-9]|[12][0-9]|3[01]|[1-9])[- /.](19|20)\d\d$" -->
                     <div class="form-group">
-                    <input type="text" name="dob" value='<?=$dob?>' placeholder="Date of Birth (mm/dd/yyyy)" class="form-control" required="" 
-                    pattern="[0-9/-]+" minlength="6" maxlength="10" oninvalid="this.setCustomValidity('Please Enter Valid Birthdate (ex. 01/20/2000)')" oninput="setCustomValidity('')">
-                    <input type="number" name="credit" value='<?=$credit?>' placeholder="Credit Score" class="form-control" required="" min='0' max='999' oninvalid="this.setCustomValidity('Please Enter Valid Credit Score')" oninput="setCustomValidity('')">
+                    <input type="text" id="dob" name="dob" value='<?=$dob?>' placeholder="Date of Birth (mm/dd/yyyy)" class="form-control" required="" 
+                    pattern="[0-9/-]+" minlength="6" maxlength="10" oninput="setCustomValidity('')">
+                    <input type="number" id="credit" name="credit" value='<?=$credit?>' placeholder="Credit Score" class="form-control" required="" min='0' max='999' oninput="setCustomValidity('')">
                     </div>
 
                     <div class="form-wrapper">
                     Do You Currently Have a LLC, S-Corp, or C-Corp? &nbsp; &nbsp;
-                            <input type="radio" id="yes" name="llc" value="yes" required>
-                            <label for="yes">Yes</label>
-                            <input type="radio" id="no" name="llc" value="no">
-                            <label for="no">No</label>
-                        </div>
-                        <p style="margin-top: 14px;">  </p>
+                        <input type="radio" id="corp_box" name="llc" value="yes" oninput="setCustomValidity('')" required>
+                        <label for="yes">Yes</label>
+                        <input type="radio" id="corp_box" name="llc" value="no" oninput="setCustomValidity('')" >
+                        <label for="no">No</label>
+                    </div>
+                    <p style="margin-top: 14px;">  </p>
 
                     <div class="form-wrapper">
-                    <input type="text" name="city" value='<?=$city?>' placeholder="City" class="form-control" required=""
-                    pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninvalid="this.setCustomValidity('Please Enter Valid City')" oninput="setCustomValidity('')">
+                    <input type="text" id='city' name="city" value='<?=$city?>' placeholder="City" class="form-control" required=""
+                    pattern="[a-zA-Z .'-]+" minlength="1" maxlength="30" oninput="setCustomValidity('')">
                     </div>
 
                     <div class="form-group">
-                    <select name="state" id="state" class="form-control" required="" oninvalid="this.setCustomValidity('Please Select State')" oninput="setCustomValidity('')">
+                    <select name="state" id="state" class="form-control" required="" oninput="setCustomValidity('')">
                         <option disabled selected value>State</option>
                         <option value="AL">AL</option>
                         <option value="AK">AK</option>
@@ -261,18 +338,108 @@
                         <option value="WV">WV</option>
                         <option value="WY">WY</option>
                     </select>
-                    <input type="text" name="zipcode"  id="zip" value='<?=$zipcode?>' placeholder="Zip Code" class="form-control" required="" 
-                    pattern="^[0-9]{5}(?:-[0-9]{4})?$" minlength="5" maxlength="10" oninvalid="this.setCustomValidity('Please Enter Valid Zip Code')" oninput="setCustomValidity('')">
+                    <input type="text" name="zipcode" id="zip" value='<?=$zipcode?>' placeholder="Zip Code" class="form-control" required="" 
+                    pattern="^[0-9]{5}(?:-[0-9]{4})?$" minlength="5" maxlength="10" oninput="setCustomValidity('')">
                     </div>
 
                     <div class="form-wrapper">
-                        <input type="checkbox" name="checkbox1" id="agree" class="checkbox" required=""
-                        oninvalid="this.setCustomValidity('Please Review Terms & Check Box')" oninput="setCustomValidity('')">
+                        <input type="checkbox" name="checkbox1" id="agree" class="checkbox" required="" oninput="setCustomValidity('')">
                         <label for="agree"><span style="font-size:14px; font-weight: 200;">&nbsp&nbspI agree to Fundafai's Registration Terms and Privacy Policy</span> </label>
                     </div>
 
                     <input type="hidden" name="token" value="<?=$_SESSION['token']?>">
+
+                    <!--Original Button
                     <button type='submit' class='prequalify_button' name='send'>Apply Now</button>
+                    <br>
+                    -->
+
+                    <!--New Button  onclick="this.classList.toggle('button--loading')"-->
+                    <button type='submit' name='send' id='submit_button' class="button2">
+                        <span style = "font-size: 1rem; color: white;" class="button__text">Apply Now</span>
+                        <span class="button_new_text"><i class="fa fa-circle-o-notch fa-spin"></i>Processing</span>
+                    </button>
+
+                        <script>
+                            let buttonclick = document.getElementById('submit_button');
+                            buttonclick.onclick = function(){
+                                buttonclick.classList.toggle('button--loading');
+                            }
+
+                            let agree_box = document.getElementById('agree');
+                            agree_box.oninvalid = function(){
+                                agree_box.setCustomValidity('Please review terms and check box');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let zip = document.getElementById('zip');
+                            zip.oninvalid = function(){
+                                zip.setCustomValidity('Please enter valid zipcode');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let first_name = document.getElementById('first_name');
+                            first_name.oninvalid = function(){
+                                first_name.setCustomValidity('Please enter valid name');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let last_name = document.getElementById('last_name');
+                            last_name.oninvalid = function(){
+                                last_name.setCustomValidity('Please enter valid name');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let email = document.getElementById('email');
+                            email.oninvalid = function(){
+                                email.setCustomValidity('Please enter valid email');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let phone = document.getElementById('phone');
+                            phone.oninvalid = function(){
+                                phone.setCustomValidity('Please enter valid phone number (ex. 777-777-7777)');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let corp_box = document.getElementById('corp_box');
+                            corp_box.oninvalid = function(){
+                                corp_box.setCustomValidity('Please select an option (Yes/No)');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let dob = document.getElementById('dob');
+                            dob.oninvalid = function(){
+                                dob.setCustomValidity('Please enter valid birthdate (ex. 01/20/2000)');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let credit = document.getElementById('credit');
+                            credit.oninvalid = function(){
+                                credit.setCustomValidity('Please enter valid credit score');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let city = document.getElementById('city');
+                            city.oninvalid = function(){
+                                city.setCustomValidity('Please enter valid city');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                            let state = document.getElementById('state');
+                            state.oninvalid = function(){
+                                state.setCustomValidity('Please enter valid state');
+                                buttonclick.classList.remove('button--loading');
+                            }
+
+                        </script>
+
+                    <!--
+                    <script>
+                    const btn = document.querySelector(".button2");
+                    btn.classList.toggle("button--loading");
+                    </script>
+                    -->
 
                 </form>
             </div>

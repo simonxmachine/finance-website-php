@@ -109,6 +109,48 @@
     <script src="https://kit.fontawesome.com/80acfed07d.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../style.css">
     <link rel="icon" type="image/x-icon" href="../images/favicon.svg">
+        <style>
+        .button2{
+            position: relative;
+        }
+
+        .fa {
+            margin-left: 0px;
+            margin-right: 8px;
+        }
+
+        .button__text{
+            color:white;
+            transition: all .2s;
+        }
+
+        .button_new_text{
+            display: none; 
+        }
+
+        .button--loading .button__text{
+            display: none;
+        }
+
+        .button--loading .button_new_text{
+            display:contents;
+            opacity: 100;
+            color:white;
+            transition: all .2s;
+        }
+
+        .button--loading::after{
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        </style>
+
 </head>
 <body>
 
@@ -116,13 +158,12 @@
 
         <div class="flexbox-container">
 
-
             <div class="flexbox-item left">
 
                 <div class = "subflex-container">
 
                     <div class="logo_subflex-item"> 
-                    <a href='../index.html'><h2>Fundafai</h2></a>
+                    <a href='../index.html'><h2>Fund<font color='#FDC93B';>a</font>fai</h2></a>
                     </div>
 
                     <div class="message_subflex-item">
@@ -135,7 +176,6 @@
                             if(!isset($message) || $message == ""){
                                 $message = "<h1 style='color:#FDC93B';>Verify Email</h1><h2 style='color:white';>"."Please enter the verification code sent to your email. </h2>";
                                 echo $message;
-
                             }
                         ?>
                     </div>
@@ -146,7 +186,7 @@
 
             <div class='flexbox-item right'>
             <center>    
-            <h3 style="font-weight:600; color: rgb(21, 21, 100)">Please verify email with the 6-digit code sent to: <span style="color:black; font-size:18px;"><?=star_email($email)?></span> </h3>
+            <h3 style="font-weight:600; color: rgb(21, 21, 100)">Please verify your email with the 6-digit code sent to: <span style="color:black; font-size:18px;"><?=star_email($email)?></span> </h3>
 
                 <p style="font-size:14px;">(Please allow up to 5 minutes to receive code)</p>
                 <br>
@@ -162,26 +202,46 @@
 
                 <?php
                     if(isset($_SESSION['login_attempts']) && $_SESSION['login_attempts']  == 5) {
-                            echo "You have 1 login attempt left.<br>";
+                            echo "<font color='red';>You have 1 login attempt left.</font><br>";
                         }
                     ?>
         <?php 
             //Sets the PHP to close verification page if too many failed attempts and redirect to reset code
                     if(isset($_SESSION['login_attempts']) && $_SESSION['login_attempts'] > 5) {
                         //$_SESSION['locked'] = time();
-                        echo "Please reset code to log in. <a href='reset_code.php'>Resend Code</a>";
+                        echo "<font color='red';>Please reset code to log in. <a href='reset_code.php'>Resend Code</a></font>";
                     } else{
                 ?>
 
-                <input id='textbox' type='text' class='input_box' placeholder="Enter Code" name='code_check' required
-                pattern="[0-9]+" maxlength='6' oninvalid="this.setCustomValidity('Please Enter Valid Code')" oninput="setCustomValidity('')"><br>
+                <input id='code' type='text' class='input_box' placeholder="Enter Code" name='code_check' required
+                pattern="[0-9]+" maxlength='6' oninput="setCustomValidity('')"><br>
 
+                <!--Original button
                 <button type='submit' name='send'>Verify Email</button>
+                    -->
+
+                <button type='submit' name='send' id='submit_button' class="button2">
+                        <span style = "font-size: 1rem; color: white;" class="button__text">Verify Email</span>
+                        <span class="button_new_text"><i class="fa fa-circle-o-notch fa-spin"></i>Verifying</span>
+                    </button>
+
                 <p style="font-size:14px;">Didn't receive a code? <a href='reset_code.php'>Resend code</a></p>
                     <?php } ;
                     ?>
                     <br>
 
+                        <script>
+                            let buttonclick = document.getElementById('submit_button');
+                            buttonclick.onclick = function(){
+                                buttonclick.classList.toggle('button--loading');
+                            }
+
+                            let code = document.getElementById('code');
+                            code.oninvalid = function(){
+                                code.setCustomValidity('Please enter valid code');
+                                buttonclick.classList.remove('button--loading');
+                            }
+                            </script>
 
             </center>
             </div>
@@ -189,7 +249,6 @@
             </form>
 
         </div>
-
 
         <footer>
     
